@@ -359,7 +359,7 @@ describe("kintsugi product acceptance", () => {
     ).toBeCloseTo(2, 6);
     expect(
       resolveStudioLighting(readKintsugiSettings(stateWithValues({}))).softboxScale,
-    ).toBe(1);
+    ).toBeCloseTo(1.2, 6);
   });
 
   it("kintsugi acceptance: ambient dome scales the environment dome", () => {
@@ -370,7 +370,7 @@ describe("kintsugi product acceptance", () => {
     ).toBeCloseTo(0.5, 6);
     expect(
       resolveStudioLighting(readKintsugiSettings(stateWithValues({}))).domeScale,
-    ).toBe(1);
+    ).toBeCloseTo(0.7, 6);
   });
 
   it("kintsugi acceptance: exposure maps to tone mapping exposure", () => {

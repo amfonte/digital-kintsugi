@@ -125,7 +125,7 @@ export const appSchema = defineToolcraft({
               unit: "%",
             },
             softbox: {
-              defaultValue: 100,
+              defaultValue: 120,
               description:
                 "Brightness of the reflected softbox panel that lights the vessel interior.",
               label: "Softbox",
@@ -141,7 +141,7 @@ export const appSchema = defineToolcraft({
               unit: "%",
             },
             ambientDome: {
-              defaultValue: 100,
+              defaultValue: 70,
               description:
                 "Brightness of the surrounding studio dome, the soft light that fills every direction.",
               label: "Ambient dome",
