@@ -1,0 +1,12 @@
+.host {
+  height: 100%;
+  position: relative;
+  width: 100%;
+}
+
+.host canvas {
+  display: block;
+  height: 100%;
+  touch-action: none;
+  width: 100%;
+}

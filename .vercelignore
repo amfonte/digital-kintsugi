@@ -1,0 +1,10 @@
+# Local-only folders that don't belong in a deploy upload.
+dist
+test-results
+playwright-report
+coverage
+e2e
+threejs-skills
+undefined
+docs
+.toolcraft
