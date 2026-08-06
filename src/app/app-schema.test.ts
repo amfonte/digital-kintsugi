@@ -8,8 +8,8 @@ describe("appSchema", () => {
     expect(appSchema.canvas.upload).toBe(false);
     expect(appSchema.canvas.sizing).toEqual({ mode: "editable-output" });
     expect(appSchema.canvas.size).toEqual({ height: 1080, unit: "px", width: 1920 });
-    expect(appSchema.canvas.renderScale.enabled).toBe(true);
-    expect(appSchema.canvas.renderScale.defaultValue).toBe(1);
+    expect(appSchema.canvas.renderScale.enabled).toBe(false);
+    expect(appSchema.canvas.renderScale.defaultValue).toBe(2);
     // The turntable runs on the renderer's own clock, so there is no timeline
     // panel and no transport surface for the user to operate.
     expect(appSchema.panels.timeline).toBeUndefined();

@@ -337,7 +337,7 @@ describe("kintsugi product performance", () => {
   });
 
   it("kintsugi perf: first preview renders within budget", () => {
-    expect(appSchema.canvas.renderScale.defaultValue).toBe(1);
+    expect(appSchema.canvas.renderScale.defaultValue).toBe(2);
     expect(
       timeRebuild({ branching: crackBranching, density: shardsPerStrike, impacts: oneStrike, seed: 21 }),
     ).toBeLessThan(rebuildBudgetMs);

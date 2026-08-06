@@ -5,7 +5,7 @@ import { defaultGlazePresetId, glazePickerItems } from "./kintsugi/glaze-library
 export const appSchema = defineToolcraft({
   canvas: {
     enabled: true,
-    renderScale: { defaultValue: 1 },
+    renderScale: { defaultValue: 2, enabled: false },
     size: { height: 1080, unit: "px", width: 1920 },
     sizing: { mode: "editable-output" },
     upload: false,
@@ -15,8 +15,8 @@ export const appSchema = defineToolcraft({
       sections: [
         // The turntable is ambient presentation rather than an editable
         // animation, so its two controls belong with the runtime's own view
-        // settings: placement "setup" drops them into the Setup block right
-        // under Resolution scale instead of giving them a collapsible panel.
+        // settings: placement "setup" drops them into the Setup block instead of
+        // giving them a collapsible panel.
         {
           controls: {
             autoRotate: {

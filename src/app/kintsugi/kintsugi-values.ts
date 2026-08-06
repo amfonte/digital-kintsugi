@@ -92,10 +92,13 @@ export function readKintsugiSettings(state: ToolcraftState): KintsugiSettings {
 }
 
 export function readRenderScale(state: ToolcraftState): number {
-  const raw = state.values["canvas.renderScale"];
-  const fallback = state.schema.canvas.renderScale.enabled
-    ? state.schema.canvas.renderScale.defaultValue
-    : 1;
+  const { defaultValue, enabled } = state.schema.canvas.renderScale;
 
-  return numberValue(raw, fallback);
+  if (!enabled) {
+    return defaultValue;
+  }
+
+  const raw = state.values["canvas.renderScale"];
+
+  return numberValue(raw, defaultValue);
 }
