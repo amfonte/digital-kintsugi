@@ -375,6 +375,7 @@ export const appSchema = defineToolcraft({
   toolbar: {
     history: true,
     radar: true,
+    theme: false,
     zoom: true,
   },
 });

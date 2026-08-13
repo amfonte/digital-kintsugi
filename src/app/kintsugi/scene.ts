@@ -1203,6 +1203,11 @@ export class KintsugiSceneManager {
   }
 
   private rebuildFracture(options?: { deferSeams?: boolean }): void {
+    // Refit the mobile camera only on the first mesh build. Later rebuilds
+    // (strikes) must keep whatever orbit the user set before tapping.
+    const shouldRefitMobileCamera =
+      this.mobileViewportActive && this.shardEntries.length === 0;
+
     this.clearVesselMeshes();
 
     this.fracture = buildFracture(this.surfaces, {
@@ -1258,7 +1263,7 @@ export class KintsugiSceneManager {
       // (a strike drops the reveal to 0) until the deferred build replaces it.
       this.seamsDeferred = true;
 
-      if (this.mobileViewportActive) {
+      if (shouldRefitMobileCamera) {
         this.applyCameraViewportFit();
       }
 
@@ -1267,7 +1272,7 @@ export class KintsugiSceneManager {
 
     this.rebuildSeams();
 
-    if (this.mobileViewportActive) {
+    if (shouldRefitMobileCamera) {
       this.applyCameraViewportFit();
     }
   }

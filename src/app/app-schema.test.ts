@@ -22,6 +22,7 @@ describe("appSchema", () => {
       expect.arrayContaining(["canvas.editableSize"]),
     );
     expect(appSchema.assembly.capabilities).not.toContain("timeline.playback");
+    expect(appSchema.toolbar.theme).toBe(false);
   });
 
   it("orders product sections with background and export sections before sticky actions", () => {

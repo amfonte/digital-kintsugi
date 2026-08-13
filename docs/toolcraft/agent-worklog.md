@@ -90,6 +90,35 @@ rendered live in three.js WebGL with turntable playback and PNG/video export.
 
 ## Decision Trail
 
+### Iteration 13 - Dark theme only
+
+- Request: Remove theme mode functionality and default to dark theme only.
+- Task type: Schema toolbar + product chrome behavior.
+- User-visible result: The light/dark theme toggle is gone from desktop and
+  mobile toolbars; the app always renders with the dark Toolcraft theme.
+- Source/reference checked: Existing `toolbar.theme` schema flag and runtime
+  `ToolcraftThemeProvider` default (`dark`).
+- Docs/contracts read: AGENTS.md, docs/toolcraft/workflow.md,
+  docs/toolcraft/schema-reference.md.
+- Contract rules applied: Disable runtime toolbar theme via schema; do not patch
+  signed `src/toolcraft`; lock resolved theme in product canvas output.
+- Decision: Set `toolbar.theme: false`, remove the theme button from
+  `mobile-toolbar-dock`, and mount `DarkThemeLock` with the canvas to call
+  `setThemePreference("dark")` on load (overriding any stored light/system
+  preference).
+- Alternatives rejected: Editing `theme-runtime.tsx` in the copied runtime
+  (violates integrity manifest); leaving theme disabled in schema only (stored
+  light preference could still apply).
+- State/output mapping: No product control targets; theme is runtime chrome only.
+  `data-toolcraft-theme="dark"` stays on the runtime shell.
+- Files changed: src/app/app-schema.ts, src/app/kintsugi/dark-theme-lock.tsx,
+  src/app/kintsugi/kintsugi-canvas.tsx, src/app/kintsugi/mobile-toolbar-dock.tsx,
+  src/app/app-schema.test.ts.
+- Verification: `npm run verify:quick`.
+- Skipped: Full browser perf checkpoint (Tier 2 toolbar-only change).
+- Risks: Users who preferred light chrome cannot restore it without a product
+  change; stored `appearance.theme.v1` is overwritten to `dark` on each load.
+
 ### Iteration 12 - Mobile viewport layout (<768px)
 
 - Request: Below 768px, center canvas controls at the bottom, dock the controls
@@ -110,7 +139,7 @@ rendered live in three.js WebGL with turntable playback and PNG/video export.
   than hand-building controls.
 - Decision: Product-owned mobile layout hides the runtime floating toolbar under
   768px, portals a dedicated `mobile-toolbar-dock` to `document.body` (undo/redo,
-  zoom, theme, center), docks the controls panel above it, sets 50% default zoom
+  zoom, center), docks the controls panel above it, sets 50% default zoom
   with viewport-centered canvas offset, and `scene.ts` bounding-sphere camera fit
   on portrait aspects.
 - Alternatives rejected: Patching signed `src/toolcraft` panel placement (breaks

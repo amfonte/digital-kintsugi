@@ -3,6 +3,7 @@ import * as React from "react";
 import { useToolcraft } from "@/toolcraft/runtime/react";
 
 import styles from "./kintsugi-canvas.module.css";
+import { DarkThemeLock } from "./dark-theme-lock";
 import { readKintsugiSettings, readRenderScale } from "./kintsugi-values";
 import {
   computeBottomDockHeight,
@@ -136,6 +137,7 @@ export function KintsugiCanvas(): React.JSX.Element {
 
   return (
     <div className={styles.host} data-toolcraft-product-output="">
+      <DarkThemeLock />
       <MobileViewportLayout />
       <canvas aria-label="Kintsugi vessel 3D preview" ref={canvasRef} />
     </div>
