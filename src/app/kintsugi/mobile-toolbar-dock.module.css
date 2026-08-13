@@ -1,0 +1,66 @@
+.dock {
+  bottom: 10px;
+  box-sizing: border-box;
+  left: 12px;
+  pointer-events: none;
+  position: fixed;
+  right: 12px;
+  z-index: 80;
+}
+
+.surface {
+  align-items: center;
+  background: var(--background);
+  border: 1px solid color-mix(in oklab, var(--border) 8%, transparent);
+  border-radius: 8px;
+  box-sizing: border-box;
+  display: flex;
+  gap: 4px;
+  isolation: isolate;
+  justify-content: space-between;
+  padding: 4px;
+  pointer-events: auto;
+  width: 100%;
+}
+
+.button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--foreground);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 1 1 0;
+  height: 36px;
+  justify-content: center;
+  max-width: 40px;
+  min-width: 32px;
+  padding: 0;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.button:not(:disabled):active {
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+}
+
+.zoomLabel {
+  color: color-mix(in oklab, var(--foreground) 90%, transparent);
+  cursor: default;
+  flex: 1 1 0;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12px;
+  line-height: 1.125rem;
+  min-width: 3ch;
+  text-align: center;
+  user-select: none;
+}
+
+.icon {
+  height: 16px;
+  width: 16px;
+}

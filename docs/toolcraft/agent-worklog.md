@@ -90,6 +90,45 @@ rendered live in three.js WebGL with turntable playback and PNG/video export.
 
 ## Decision Trail
 
+### Iteration 12 - Mobile viewport layout (<768px)
+
+- Request: Below 768px, center canvas controls at the bottom, dock the controls
+  panel collapsed above them with ~75% viewport height when expanded, and scale
+  the bowl to fit while preserving toolbar zoom and orbit.
+- Task type: Product renderer + viewport layout adaptation.
+- User-visible result: On narrow viewports the floating desktop panels dock to
+  the bottom (toolbar centered, controls sheet above), the artboard auto-fits
+  with bottom inset, and the 3D camera pulls back on portrait aspects so the
+  vessel stays in frame; desktop layout is unchanged.
+- Source/reference checked: User markup screenshot with mobile panel/stack
+  annotations.
+- Docs/contracts read: AGENTS.md, docs/toolcraft/workflow.md,
+  docs/toolcraft/core/layout.md, docs/toolcraft/core/runtime-boundary.md.
+- Contract rules applied: runtime shell/panel chrome stays upstream; product
+  adapts layout through a null-render viewport helper mounted with the canvas
+  output and runtime commands (`canvas.setViewport`, `panels.resetOffset`) rather
+  than hand-building controls.
+- Decision: Product-owned mobile layout hides the runtime floating toolbar under
+  768px, portals a dedicated `mobile-toolbar-dock` to `document.body` (undo/redo,
+  zoom, theme, center), docks the controls panel above it, sets 50% default zoom
+  with viewport-centered canvas offset, and `scene.ts` bounding-sphere camera fit
+  on portrait aspects.
+- Alternatives rejected: Patching signed `src/toolcraft` panel placement (breaks
+  integrity manifest signature); DOM-repositioning the runtime toolbar (Framer
+  Motion transform containing block kept clipping undo/redo).
+- State/output mapping: Mobile fit uses `canvas.setViewport` once on breakpoint
+  entry; user zoom/pan/orbit afterward stays in runtime state. Camera fit reads
+  visual viewport width/height only on mobile.
+- Files changed: src/app/kintsugi/mobile-viewport-layout.tsx,
+  src/app/kintsugi/mobile-toolbar-dock.tsx,
+  src/app/kintsugi/mobile-toolbar-dock.module.css,
+  src/app/kintsugi/kintsugi-canvas.tsx, src/app/kintsugi/scene.ts.
+- Verification: `npm run typecheck`; vitest kintsugi product suites (59 tests).
+- Skipped: Full `npm run verify:quick` (pre-existing line-budget failures);
+  browser mobile layout pass (manual dev-server check at 375px recommended).
+- Risks: DOM-adaptive panel docking depends on runtime panel data attributes;
+  upstream Toolcraft mobile shell would be the durable fix.
+
 ### Iteration 1 - Kintsugi 3D visualizer product build
 
 - Request: Build an interactive 3D kintsugi visualizer: procedural ceramic bowl

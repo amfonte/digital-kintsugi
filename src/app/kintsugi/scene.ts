@@ -160,6 +160,11 @@ function glazeUvTransform(preset: GlazePreset): GlazeUvTransform {
 }
 
 const vesselCenterY = 0.37;
+
+// Camera offset from the orbit target at the default desktop framing.
+const defaultCameraOffset = new THREE.Vector3(2.15, 1.33, 2.3);
+// Bounding-sphere fallback when fracture meshes are not built yet.
+const vesselFitFallbackRadius = 1.05;
 // Hairline floor of the open channel between shards. The gold always covers at
 // least this; "generosity" (the Width control) then opens the crack — and the
 // gold that fills it — wider along each run and pools it open at junctions, via
@@ -229,7 +234,7 @@ function pourEase(t: number): number {
 // Seconds for one full turntable revolution. There is no timeline panel, so
 // this single constant is the loop period for both the live preview and the
 // video export, and every exported clip is exactly one revolution long.
-export const turntableLoopSeconds = 12;
+export const turntableLoopSeconds = 16;
 
 // A tab that was backgrounded returns with a huge frame delta; clamping it
 // keeps the vessel from jumping most of a revolution on the first frame back.
@@ -282,6 +287,9 @@ export class KintsugiSceneManager {
   private animationFrame: number | null = null;
   private cssHeight = 0;
   private cssWidth = 0;
+  private mobileViewportActive = false;
+  private mobileViewportAspect = 16 / 9;
+  private mobileViewportBottomInsetPx = 0;
   private disposed = false;
   private exporting = false;
   private fracture: FractureResult | null = null;
@@ -392,10 +400,10 @@ export class KintsugiSceneManager {
     this.disposeGoldEnvironment = goldEnv.dispose;
 
     this.camera = new THREE.PerspectiveCamera(38, 16 / 9, 0.1, 60);
-    this.camera.position.set(2.15, 1.7, 2.3);
 
     this.controls = new OrbitControls(this.camera, canvas);
     this.controls.target.set(0, vesselCenterY, 0);
+    this.camera.position.set(0, vesselCenterY, 0).add(defaultCameraOffset);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.08;
     this.controls.enablePan = false;
@@ -851,6 +859,34 @@ export class KintsugiSceneManager {
     this.applyViewSize();
   }
 
+  setViewportLayout(options: {
+    bottomInsetPx?: number;
+    isMobile: boolean;
+    viewportHeight: number;
+    viewportWidth: number;
+  }): void {
+    const bottomInsetPx = Math.max(0, options.bottomInsetPx ?? 0);
+    const visibleHeight = Math.max(1, options.viewportHeight - bottomInsetPx);
+    const nextAspect =
+      options.viewportWidth > 0 && visibleHeight > 0
+        ? options.viewportWidth / visibleHeight
+        : 16 / 9;
+    const nextActive = options.isMobile;
+
+    if (
+      nextActive === this.mobileViewportActive &&
+      Math.abs(nextAspect - this.mobileViewportAspect) < 0.001 &&
+      bottomInsetPx === this.mobileViewportBottomInsetPx
+    ) {
+      return;
+    }
+
+    this.mobileViewportActive = nextActive;
+    this.mobileViewportAspect = nextAspect;
+    this.mobileViewportBottomInsetPx = bottomInsetPx;
+    this.applyCameraViewportFit();
+  }
+
   notifyViewportInteraction(): void {
     this.suspendedUntilMs = performance.now() + viewportSuspendMs;
   }
@@ -1110,6 +1146,43 @@ export class KintsugiSceneManager {
     this.needsRender = true;
   }
 
+  private applyCameraViewportFit(): void {
+    const target = this.controls.target;
+
+    if (!this.mobileViewportActive) {
+      this.camera.position.set(0, vesselCenterY, 0).add(defaultCameraOffset);
+      this.controls.update();
+      this.needsRender = true;
+      return;
+    }
+
+    const fitSphere = new THREE.Sphere();
+    const fitBox = new THREE.Box3().setFromObject(this.vesselPivot);
+
+    if (fitBox.isEmpty()) {
+      fitSphere.center.set(0, 0, 0);
+      fitSphere.radius = vesselFitFallbackRadius;
+    } else {
+      fitBox.getBoundingSphere(fitSphere);
+      fitSphere.center.sub(target);
+    }
+
+    const fovRad = THREE.MathUtils.degToRad(this.camera.fov);
+    const aspect = Math.max(0.35, this.mobileViewportAspect);
+    const fitDistanceVertical = fitSphere.radius / Math.sin(fovRad / 2);
+    const fitDistanceHorizontal =
+      fitSphere.radius / (Math.sin(fovRad / 2) * aspect);
+    const fitDistance =
+      Math.max(fitDistanceVertical, fitDistanceHorizontal) * 1.04;
+    const viewDirection = defaultCameraOffset.clone().normalize();
+
+    this.camera.position
+      .copy(target)
+      .add(viewDirection.multiplyScalar(fitDistance));
+    this.controls.update();
+    this.needsRender = true;
+  }
+
   private clearVesselMeshes(): void {
     for (const entry of this.shardEntries) {
       entry.mesh.geometry.dispose();
@@ -1184,10 +1257,19 @@ export class KintsugiSceneManager {
       // The stale seam mesh no longer matches these shards, but it is hidden
       // (a strike drops the reveal to 0) until the deferred build replaces it.
       this.seamsDeferred = true;
+
+      if (this.mobileViewportActive) {
+        this.applyCameraViewportFit();
+      }
+
       return;
     }
 
     this.rebuildSeams();
+
+    if (this.mobileViewportActive) {
+      this.applyCameraViewportFit();
+    }
   }
 
   // Build the deferred gold during the beat the shards hang at full spread:

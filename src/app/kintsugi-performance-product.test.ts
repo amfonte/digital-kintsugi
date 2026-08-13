@@ -289,10 +289,10 @@ describe("kintsugi product performance", () => {
     // revolution is sampled, so frame count scales while duration does not.
     const plan = getKintsugiVideoFramePlan(turntableLoopSeconds, 30);
 
-    expect(plan.count).toBe(360);
+    expect(plan.count).toBe(480);
     expect(plan.frameDurationMicros).toBe(33333);
-    expect(getKintsugiVideoFramePlan(turntableLoopSeconds, 24).count).toBe(288);
-    expect(getKintsugiVideoFramePlan(turntableLoopSeconds, 60).count).toBe(720);
+    expect(getKintsugiVideoFramePlan(turntableLoopSeconds, 24).count).toBe(384);
+    expect(getKintsugiVideoFramePlan(turntableLoopSeconds, 60).count).toBe(960);
 
     for (const framesPerSecond of kintsugiVideoFrameRates) {
       const { count, frameDurationMicros } = getKintsugiVideoFramePlan(

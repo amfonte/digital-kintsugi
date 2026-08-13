@@ -4,8 +4,28 @@ import { useToolcraft } from "@/toolcraft/runtime/react";
 
 import styles from "./kintsugi-canvas.module.css";
 import { readKintsugiSettings, readRenderScale } from "./kintsugi-values";
+import {
+  computeBottomDockHeight,
+  MobileViewportLayout,
+  mobileViewportMaxWidthPx,
+  type MobileViewportSnapshot,
+} from "./mobile-viewport-layout";
 import { KintsugiSceneManager, setActiveKintsugiScene } from "./scene";
 import { isKintsugiWebglAvailable } from "./stage";
+
+function readMobileViewportSnapshot(): MobileViewportSnapshot {
+  if (typeof window === "undefined") {
+    return { isMobile: false, viewportHeight: 0, viewportWidth: 0 };
+  }
+
+  const viewport = window.visualViewport;
+
+  return {
+    isMobile: window.innerWidth <= mobileViewportMaxWidthPx,
+    viewportHeight: viewport?.height ?? window.innerHeight,
+    viewportWidth: viewport?.width ?? window.innerWidth,
+  };
+}
 
 export function KintsugiCanvas(): React.JSX.Element {
   const { state } = useToolcraft();
@@ -38,6 +58,30 @@ export function KintsugiCanvas(): React.JSX.Element {
   const viewportOffsetX = state.canvas.offset.x;
   const viewportOffsetY = state.canvas.offset.y;
   const viewportZoom = state.canvas.zoom;
+  const [mobileViewport, setMobileViewport] = React.useState<MobileViewportSnapshot>(
+    readMobileViewportSnapshot,
+  );
+
+  React.useEffect(() => {
+    const updateViewport = (): void => {
+      setMobileViewport(readMobileViewportSnapshot());
+    };
+
+    const mediaQueryList = window.matchMedia(
+      `(max-width: ${mobileViewportMaxWidthPx}px)`,
+    );
+
+    mediaQueryList.addEventListener("change", updateViewport);
+    window.visualViewport?.addEventListener("resize", updateViewport);
+    window.addEventListener("resize", updateViewport);
+    updateViewport();
+
+    return () => {
+      mediaQueryList.removeEventListener("change", updateViewport);
+      window.visualViewport?.removeEventListener("resize", updateViewport);
+      window.removeEventListener("resize", updateViewport);
+    };
+  }, []);
 
   React.useEffect(() => {
     managerRef.current?.applySettings(settings);
@@ -66,6 +110,19 @@ export function KintsugiCanvas(): React.JSX.Element {
     managerRef.current?.setViewSize(canvasWidth, canvasHeight, renderScale);
   }, [canvasHeight, canvasWidth, renderScale]);
 
+  React.useEffect(() => {
+    managerRef.current?.setViewportLayout({
+      bottomInsetPx: mobileViewport.isMobile ? computeBottomDockHeight() : 0,
+      isMobile: mobileViewport.isMobile,
+      viewportHeight: mobileViewport.viewportHeight,
+      viewportWidth: mobileViewport.viewportWidth,
+    });
+  }, [
+    mobileViewport.isMobile,
+    mobileViewport.viewportHeight,
+    mobileViewport.viewportWidth,
+  ]);
+
   const viewportInteractionSeenRef = React.useRef(false);
 
   React.useEffect(() => {
@@ -79,6 +136,7 @@ export function KintsugiCanvas(): React.JSX.Element {
 
   return (
     <div className={styles.host} data-toolcraft-product-output="">
+      <MobileViewportLayout />
       <canvas aria-label="Kintsugi vessel 3D preview" ref={canvasRef} />
     </div>
   );

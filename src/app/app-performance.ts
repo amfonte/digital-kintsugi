@@ -449,7 +449,7 @@ export const appPerformance: ToolcraftPerformanceConfig = defineToolcraftPerform
           userFacingRange: "fully-guaranteed",
         },
         reason:
-          "60 FPS is the largest frame count the schema offers: 720 frames for the 12-second loop, twice the default.",
+          "60 FPS is the largest frame count the schema offers: 960 frames for the 16-second loop, twice the default.",
         value: "60",
       },
       target: "export.video.fps",
