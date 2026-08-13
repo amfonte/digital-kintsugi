@@ -59,7 +59,7 @@ export function MobileToolbarDock({
     <div className={styles.dock} data-kintsugi-mobile-toolbar="">
       <div className={styles.surface}>
         {historyEnabled ? (
-          <>
+          <div className={styles.group}>
             <MobileToolbarButton
               disabled={!canUndo}
               label="Undo"
@@ -74,10 +74,10 @@ export function MobileToolbarDock({
             >
               <Redo2 aria-hidden="true" className={styles.icon} />
             </MobileToolbarButton>
-          </>
+          </div>
         ) : null}
         {zoomEnabled ? (
-          <>
+          <div className={styles.zoomGroup}>
             <MobileToolbarButton
               label="Zoom out"
               onClick={() => dispatch({ type: "canvas.zoomOut" })}
@@ -99,15 +99,17 @@ export function MobileToolbarDock({
             >
               <ZoomIn aria-hidden="true" className={styles.icon} />
             </MobileToolbarButton>
-          </>
+          </div>
         ) : null}
         {radarEnabled ? (
-          <MobileToolbarButton
-            label="Center canvas"
-            onClick={() => dispatch({ type: "canvas.center" })}
-          >
-            <TargetIcon aria-hidden="true" className={styles.icon} />
-          </MobileToolbarButton>
+          <div className={styles.group}>
+            <MobileToolbarButton
+              label="Center canvas"
+              onClick={() => dispatch({ type: "canvas.center" })}
+            >
+              <TargetIcon aria-hidden="true" className={styles.icon} />
+            </MobileToolbarButton>
+          </div>
         ) : null}
       </div>
     </div>,

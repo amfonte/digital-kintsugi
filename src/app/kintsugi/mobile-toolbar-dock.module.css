@@ -15,12 +15,20 @@
   border-radius: 8px;
   box-sizing: border-box;
   display: flex;
-  gap: 4px;
+  gap: 8px;
   isolation: isolate;
   justify-content: space-between;
   padding: 4px;
   pointer-events: auto;
   width: 100%;
+}
+
+.group,
+.zoomGroup {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 20px;
 }
 
 .button {
@@ -31,12 +39,12 @@
   color: var(--foreground);
   cursor: pointer;
   display: inline-flex;
-  flex: 1 1 0;
+  flex: 0 0 auto;
   height: 36px;
   justify-content: center;
-  max-width: 40px;
-  min-width: 32px;
+  min-width: 36px;
   padding: 0;
+  width: 36px;
 }
 
 .button:disabled {
@@ -51,11 +59,12 @@
 .zoomLabel {
   color: color-mix(in oklab, var(--foreground) 90%, transparent);
   cursor: default;
-  flex: 1 1 0;
+  flex: 0 0 auto;
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 12px;
+  font-variant-numeric: tabular-nums;
   line-height: 1.125rem;
-  min-width: 3ch;
+  min-width: 4ch;
   text-align: center;
   user-select: none;
 }
