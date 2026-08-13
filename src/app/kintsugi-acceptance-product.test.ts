@@ -561,7 +561,7 @@ describe("kintsugi product acceptance", () => {
   });
 
   it("kintsugi acceptance: the turntable loop is one revolution", () => {
-    expect(turntableLoopSeconds).toBe(16);
+    expect(turntableLoopSeconds).toBe(22);
 
     // One loop is exactly one revolution: the seam pose at phase 0 and phase 1
     // is identical for both easings, and motion is forward-only inside a loop.

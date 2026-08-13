@@ -22,7 +22,7 @@ export const appTransferMode: ToolcraftTransferMode = {
     ],
     mode: "autonomous",
     reason:
-      "The turntable is ambient presentation, not an editable animation: it runs one seamless 16-second revolution on the renderer's own clock, with Auto-rotate as the only user control. There is no time to scrub to, no duration to edit, and no frame the user picks — video export always encodes exactly one revolution.",
+      "The turntable is ambient presentation, not an editable animation: it runs one seamless 22-second revolution on the renderer's own clock, with Auto-rotate as the only user control. There is no time to scrub to, no duration to edit, and no frame the user picks — video export always encodes exactly one revolution.",
   },
   mode: "new-toolcraft-app",
 };
@@ -384,7 +384,7 @@ export const appAcceptance: readonly ToolcraftComponentAcceptance[] = [
     componentType: "select",
     evidence: "exported-bytes",
     expectedObservable:
-      "The encoded clip stays one 16-second revolution at every setting while the frame count scales: 384 frames at 24, 480 at 30, and 960 at 60.",
+      "The encoded clip stays one 22-second revolution at every setting while the frame count scales: 528 frames at 24, 660 at 30, and 1320 at 60.",
     fixture: "Default whole bowl at Current resolution.",
     id: "export-video-fps",
     kind: "control",
@@ -401,7 +401,7 @@ export const appAcceptance: readonly ToolcraftComponentAcceptance[] = [
     componentType: "panelActions",
     evidence: "exported-bytes",
     expectedObservable:
-      "Export PNG downloads a decodable still at export resolution and Export Video downloads a video that runs one full 16-second turntable revolution, with the sticky progress accent visible while pending.",
+      "Export PNG downloads a decodable still at export resolution and Export Video downloads a video that runs one full 22-second turntable revolution, with the sticky progress accent visible while pending.",
     fixture: "Default whole bowl; video exported at Current resolution and 24 FPS.",
     id: "export-actions",
     kind: "control",

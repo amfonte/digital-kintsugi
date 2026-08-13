@@ -234,7 +234,7 @@ function pourEase(t: number): number {
 // Seconds for one full turntable revolution. There is no timeline panel, so
 // this single constant is the loop period for both the live preview and the
 // video export, and every exported clip is exactly one revolution long.
-export const turntableLoopSeconds = 16;
+export const turntableLoopSeconds = 22;
 
 // A tab that was backgrounded returns with a huge frame delta; clamping it
 // keeps the vessel from jumping most of a revolution on the first frame back.
