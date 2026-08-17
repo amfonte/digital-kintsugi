@@ -6,6 +6,9 @@ import { MobileToolbarDock } from "./mobile-toolbar-dock";
 
 export const mobileViewportMaxWidthPx = 767;
 const controlsExpandedMaxHeightVh = 75;
+const mobileControlsTopInsetPx = 12;
+// Keep panel chrome below portaled selects (z-50) and the mobile dock (z-80).
+const mobileControlsPanelZIndex = 40;
 const toolbarBottomPx = 10;
 const dockGapPx = 8;
 const mobileHorizontalInsetPx = 12;
@@ -156,9 +159,22 @@ function setRuntimeToolbarHidden(hidden: boolean): void {
   wrapper.style.removeProperty("display");
 }
 
+function computeMobileControlsMaxHeightPx(
+  viewportHeight: number,
+  controlsBottom: number,
+): number {
+  const visibleViewportHeight =
+    viewportHeight > 0 ? viewportHeight : window.innerHeight;
+  const availableHeight =
+    visibleViewportHeight - controlsBottom - mobileControlsTopInsetPx;
+  const expandedCap = visibleViewportHeight * (controlsExpandedMaxHeightVh / 100);
+
+  return Math.max(120, Math.min(expandedCap, availableHeight));
+}
+
 function applyMobilePanelLayout(
   restoreEntries: StyleRestoreEntry[],
-  options: { collapseControls: boolean },
+  options: { collapseControls: boolean; viewportHeight: number },
 ): void {
   const appRoot = document.querySelector('[data-slot="toolcraft-runtime-app"]');
   const controlsWrapper = findPanelOuterWrapper("controls");
@@ -186,6 +202,10 @@ function applyMobilePanelLayout(
             "transform",
             "width",
             "zIndex",
+            "maxHeight",
+            "overflow",
+            "display",
+            "flexDirection",
           ])]
         : []),
       ...(runtimeToolbarWrapper
@@ -197,6 +217,8 @@ function applyMobilePanelLayout(
               "width",
               "maxWidth",
               "maxHeight",
+              "minHeight",
+              "overflow",
             ]),
           ]
         : []),
@@ -215,17 +237,25 @@ function applyMobilePanelLayout(
       ? mobileToolbar.getBoundingClientRect().height
       : mobileToolbarFallbackHeightPx;
   const controlsBottom = toolbarBottomPx + toolbarHeight + dockGapPx;
+  const controlsMaxHeightPx = computeMobileControlsMaxHeightPx(
+    options.viewportHeight,
+    controlsBottom,
+  );
 
   if (controlsWrapper instanceof HTMLElement) {
     Object.assign(controlsWrapper.style, {
       bottom: `${controlsBottom}px`,
+      display: "flex",
+      flexDirection: "column",
       left: `${mobileHorizontalInsetPx}px`,
+      maxHeight: `${controlsMaxHeightPx}px`,
+      overflow: "hidden",
       position: "fixed",
       right: `${mobileHorizontalInsetPx}px`,
       top: "auto",
       transform: "none",
       width: "auto",
-      zIndex: "70",
+      zIndex: `${mobileControlsPanelZIndex}`,
     });
   }
 
@@ -236,8 +266,10 @@ function applyMobilePanelLayout(
 
   if (controlsPanel instanceof HTMLElement) {
     Object.assign(controlsPanel.style, {
-      maxHeight: `${controlsExpandedMaxHeightVh}dvh`,
+      maxHeight: `${controlsMaxHeightPx}px`,
       maxWidth: "100%",
+      minHeight: "0",
+      overflow: "hidden",
       width: "100%",
     });
   }
@@ -306,6 +338,7 @@ export function MobileViewportLayout(): React.JSX.Element | null {
         resetMobilePanelOffsets();
         applyMobilePanelLayout(restoreEntriesRef.current, {
           collapseControls: enteringMobile,
+          viewportHeight,
         });
 
         if (enteringMobile) {
@@ -340,24 +373,49 @@ export function MobileViewportLayout(): React.JSX.Element | null {
       return undefined;
     }
 
-    const updateControlsPosition = (): void => {
-      applyMobilePanelLayout(restoreEntriesRef.current, {
-        collapseControls: false,
+    let layoutFrame: number | null = null;
+
+    const scheduleControlsLayout = (): void => {
+      if (layoutFrame !== null) {
+        window.cancelAnimationFrame(layoutFrame);
+      }
+
+      layoutFrame = window.requestAnimationFrame(() => {
+        layoutFrame = null;
+        applyMobilePanelLayout(restoreEntriesRef.current, {
+          collapseControls: false,
+          viewportHeight,
+        });
       });
     };
 
-    updateControlsPosition();
-    const observer = new ResizeObserver(updateControlsPosition);
+    scheduleControlsLayout();
+
+    const resizeObserver = new ResizeObserver(scheduleControlsLayout);
+    const mutationObserver = new MutationObserver(scheduleControlsLayout);
     const mobileToolbar = document.querySelector('[data-kintsugi-mobile-toolbar=""]');
+    const controlsWrapper = findPanelOuterWrapper("controls");
 
     if (mobileToolbar instanceof HTMLElement) {
-      observer.observe(mobileToolbar);
+      resizeObserver.observe(mobileToolbar);
+    }
+
+    if (controlsWrapper instanceof HTMLElement) {
+      mutationObserver.observe(controlsWrapper, {
+        childList: true,
+        subtree: true,
+      });
     }
 
     return () => {
-      observer.disconnect();
+      if (layoutFrame !== null) {
+        window.cancelAnimationFrame(layoutFrame);
+      }
+
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
     };
-  }, [isMobile, viewportWidth]);
+  }, [isMobile, viewportHeight, viewportWidth]);
 
   React.useEffect(() => {
     for (const blocker of dragBlockersRef.current) {

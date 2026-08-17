@@ -98,15 +98,32 @@ export function ControlsPanel({
     setCollapsedSectionByKey(readControlsPanelCollapsedSections(sectionCollapseStorageKey));
   }, [sectionCollapseStorageKey]);
 
+  const [controlsResetKey, setControlsResetKey] = React.useState(0);
+  const lastResetUndoLengthRef = React.useRef<number | null>(null);
+
+  React.useEffect(() => {
+    const lastHistoryPatch = state.history.undo.at(-1);
+
+    if (lastHistoryPatch?.label !== "Reset controls") {
+      return;
+    }
+
+    const undoLength = state.history.undo.length;
+
+    if (lastResetUndoLengthRef.current === undoLength) {
+      return;
+    }
+
+    lastResetUndoLengthRef.current = undoLength;
+    setControlsResetKey((current) => current + 1);
+  }, [state.history.undo]);
+
   if (!controlsPanel) {
     return null;
   }
 
   const resolvedControlsPanel = controlsPanel;
   const placement = panelPlacement ?? (framed ? "frame" : "surface");
-  const lastHistoryPatch = state.history.undo.at(-1);
-  const controlsResetKey =
-    lastHistoryPatch?.label === "Reset controls" ? state.history.undo.length : 0;
 
   function dispatchCommand(command: ToolcraftCommand): void {
     dispatch(command);
